@@ -6,7 +6,6 @@ indices:
     fetch: https://{repo}-{owner}.project-helix.page/{path}
     target: azure
     include:
-      - (en|de|fr)/drafts/migrated/**/*.(md|docx)
       - (en|de|fr)/publish/**/*.(md|docx)
     properties:
       author:
