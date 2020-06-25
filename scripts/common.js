@@ -134,16 +134,16 @@ export function addPageTypeAsBodyClass() {
  * @param {node} newparent The new parent node
  * @param {array} nodes The nodes to wrap
  */
-export function wrapNodes(newparent, nodes) {	
-  nodes.forEach((el, index) => {	
-    newparent.appendChild(el.cloneNode(true));	
-    if (newparent.children.length !== 1) {	
-      el.parentNode.removeChild(el);	
-    } else {	
-      el.parentNode.replaceChild(newparent, el);	
-    }	
-  });	
-}	
+export function wrapNodes(newparent, nodes) {
+  nodes.forEach((el, index) => {
+    newparent.appendChild(el.cloneNode(true));
+    if (newparent.children.length !== 1) {
+      el.parentNode.removeChild(el);
+    } else {
+      el.parentNode.replaceChild(newparent, el);
+    }
+  });
+}
 
 /**
  * Uses a selector to find and wrap nodes with a new parent element,
@@ -151,16 +151,16 @@ export function wrapNodes(newparent, nodes) {
  * @param {string} classname The CSS class for the wrapping node
  * @param {array|string} selectors The selectors for the affected nodes
  */
-export function wrap(classname, selectors) {	
+export function wrap(classname, selectors) {
   if (!Array.isArray(selectors)) {
     selectors=[selectors];
   }
-  const div = document.createElement('div');	
+  const div = document.createElement('div');
   div.className = classname;
 
   selectors.forEach((selector) => {
     const elems = document.querySelectorAll(selector);
-    wrapNodes(div, elems);	
+    wrapNodes(div, elems);
   });
 }
 
@@ -180,9 +180,9 @@ export function addClass(selector, cssClass, parent) {
         up--;
       }
       el.classList.add(cssClass);
-    }  
+    }
   });
-} 
+}
 
 /**
  * Removes header and footer if empty.
@@ -334,47 +334,56 @@ export function addCard(hit, $container, $template) {
  * @param {string} key The Algolia user key
  * @returns {function} The query function
  */
-export function helixQuery(appId, key) {
+export function helixQuery(appId, key, indexName) {
   return async (queries, hitsPerPage) => {
     const page = window.blog.nextPage || 0;
     window.blog.nextPage = page + 1;
     // console.log('query for page', page);
-    if (!queries || queries.length === 0) return { hits: []};
-    const url = new URL(`https://${appId}-dsn.algolia.net/1/indexes/*/queries`);
-    const serializeQueryParameters = (q) => {
-      const sp = new URLSearchParams();
-      Object.entries(q)
-        .filter(([key]) => key !== 'indexName' && key !== 'customSort')
-        .forEach(([key, value]) => {
-          if (Array.isArray(value)) {
-            value.forEach((v) => {
-              sp.append(key, v);
-            });
-          } else {
-            sp.append(key, value);
-          }
-        });
-      return sp.toString();
-    };
-    const requests = queries.map(q => {
-      return {
-        indexName: q.indexName,
-        params: serializeQueryParameters({ ...q, page, hitsPerPage }),
-      };
-    });
+    if (!queries || queries.length === 0) {
+      return { hits: [] };
+    }
+    const url = new URL(`https://${appId}.search.windows.net/indexes/${indexName}/docs`);
 
-    /*
-    fetch from algolia
-    */
-    
+    // const serializeQueryParameters = (q) => {
+    //   const sp = new URLSearchParams();
+    //   Object.entries(q)
+    //     .filter(([key]) => key !== 'indexName' && key !== 'customSort')
+    //     .forEach(([key, value]) => {
+    //       if (Array.isArray(value)) {
+    //         value.forEach((v) => {
+    //           sp.append(key, v);
+    //         });
+    //       } else {
+    //         sp.append(key, value);
+    //       }
+    //     });
+    //   return sp.toString();
+    // };
+    // const requests = queries.map(q => {
+    //   return {
+    //     indexName: q.indexName,
+    //     params: serializeQueryParameters({ ...q, page, hitsPerPage }),
+    //   };
+    // });
+
+    const headers = new Headers();
+    headers.append('api-key', key);
+
+    const [query] = queries;
+
+    const params = [];
+    params.push('api-version=2019-05-06');
+    params.push(`$filter=${encodeURIComponent(query.filters)}`);
+    if (query.hitsPerPage) {
+      params.push(`$top=${query.hitsPerPage}`);
+    }
+    params.push('$orderby=date desc');
+    params.push('$count=true');
+
+    url.search = params.join('&');
     const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'X-Algolia-API-Key': key,
-        'X-Algolia-Application-Id': appId,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: JSON.stringify({ requests }),
+      method: 'GET',
+      headers,
     });
 
     /*
@@ -384,7 +393,13 @@ export function helixQuery(appId, key) {
     //   method: 'GET'
     // });
 
-    const { results } = await res.json();
+    const json = await res.json();
+
+    const results = [{
+      hits: json.value,
+      nbHits: json['@odata.count'],
+    }];
+
     if (!results) return [];
     let extraHits = [];
     let nbHits = 0;
@@ -427,17 +442,18 @@ export function setupSearch({
   transformer = itemTransformer,
   callback = () => {},
 }) {
-  const query = helixQuery('A8PL9E4TZT', '49f861a069d3c1cdb2c15f6db7929199');
+  const query = helixQuery('theblog2', 'EC335B6E0FD02448CBE225719699BCE8', indexName);
   const filters = Array.from(facetFilters);
   const featured = getPostPaths('h2#featured-posts', 1, true);
 
   const queries = [];
   if (filters.length === 0 || filters[0].length > 0) {
-    filters.push(`parents:${window.blog.context}${window.blog.language}`);
-    filters.push(`date < ${Math.round(Date.now()/1000)}`); // hide articles with future dates
+    const lang = `${window.blog.context}${window.blog.language}`.substr(1);
+    filters.push(`path ge '${lang}/' and path lt '${lang}0'`);
+    filters.push(`date lt ${Math.round(Date.now()/1000)}`); // hide articles with future dates
     queries.push({
       indexName,
-      filters: filters.join(' AND '),
+      filters: filters.join(' and '),
     });
   }
 
@@ -512,7 +528,7 @@ export function setupSearch({
 function formatLocalDate(date) {
   const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
-  ];  
+  ];
   const dateObj = date.split('-');
 
   return monthNames[parseInt(dateObj[0])-1] + " " + dateObj[1] + ", " + dateObj[2];
@@ -595,9 +611,9 @@ export function fetchArticles() {
     facetFilters = [''];
     omitEmpty = true; // don't display anything if no results
   } else if (window.blog.pageType === window.blog.TYPE.TOPIC) {
-    facetFilters = [`topics:"${document.title}"`];
+    facetFilters = [`topics/any(p: p eq '${document.title}')`];
   } else if (window.blog.pageType === window.blog.TYPE.AUTHOR) {
-    facetFilters = [`author:"${document.title.split(',')[0]}"`];
+    facetFilters = [`author eq '${document.title.split(',')[0]}'`];
   }
   setupSearch({
     facetFilters,
