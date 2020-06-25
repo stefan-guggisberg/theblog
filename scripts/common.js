@@ -461,14 +461,14 @@ export function setupSearch({
   if (extraPaths.length) {
     queries.push({
       indexName,
-      filters: extraPaths.map(p => `path:${p.substr(1)}`).join(' OR '),
+      filters: extraPaths.map(p => `path eq '${p.substr(1)}'`).join(' or '),
     })
   }
 
   if (featured.length) {
     queries.unshift({
       indexName,
-      filters: featured.map(p => `path:${p.substr(1)}`).join(' OR '),
+      filters: featured.map(p => `path eq '${p.substr(1)}'`).join(' or '),
       customSort: (hit1, hit2) => featured.indexOf(`/${hit1.path}`) - featured.indexOf(`/${hit2.path}`),
     })
   }
