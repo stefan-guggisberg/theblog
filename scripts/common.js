@@ -338,53 +338,39 @@ export function helixQuery(appId, key, indexName) {
   return async (queries, hitsPerPage) => {
     const page = window.blog.nextPage || 0;
     window.blog.nextPage = page + 1;
-    // console.log('query for page', page);
     if (!queries || queries.length === 0) {
       return { hits: [] };
     }
+
+    // fetch from azure
     const url = new URL(`https://${appId}.search.windows.net/indexes/${indexName}/docs`);
-
-    // const serializeQueryParameters = (q) => {
-    //   const sp = new URLSearchParams();
-    //   Object.entries(q)
-    //     .filter(([key]) => key !== 'indexName' && key !== 'customSort')
-    //     .forEach(([key, value]) => {
-    //       if (Array.isArray(value)) {
-    //         value.forEach((v) => {
-    //           sp.append(key, v);
-    //         });
-    //       } else {
-    //         sp.append(key, value);
-    //       }
-    //     });
-    //   return sp.toString();
-    // };
-    // const requests = queries.map(q => {
-    //   return {
-    //     indexName: q.indexName,
-    //     params: serializeQueryParameters({ ...q, page, hitsPerPage }),
-    //   };
-    // });
-
     const headers = new Headers();
     headers.append('api-key', key);
 
-    const [query] = queries;
+    const results = [];
+    await Promise.all(queries.map(async (query) => {
+      const params = [];
+      params.push('api-version=2019-05-06');
+      params.push(`$filter=${encodeURIComponent(query.filters)}`);
+      if (query.hitsPerPage) {
+        params.push(`$top=${query.hitsPerPage}`);
+      }
+      params.push('$orderby=date desc');
+      params.push('$count=true');
 
-    const params = [];
-    params.push('api-version=2019-05-06');
-    params.push(`$filter=${encodeURIComponent(query.filters)}`);
-    if (query.hitsPerPage) {
-      params.push(`$top=${query.hitsPerPage}`);
-    }
-    params.push('$orderby=date desc');
-    params.push('$count=true');
+      url.search = params.join('&');
+      const res = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
 
-    url.search = params.join('&');
-    const res = await fetch(url, {
-      method: 'GET',
-      headers,
-    });
+      const json = await res.json();
+
+      results.push({
+        hits: json.value,
+        nbHits: json['@odata.count'],
+      });
+    }));
 
     /*
     fetch locally for offline dev
@@ -393,14 +379,6 @@ export function helixQuery(appId, key, indexName) {
     //   method: 'GET'
     // });
 
-    const json = await res.json();
-
-    const results = [{
-      hits: json.value,
-      nbHits: json['@odata.count'],
-    }];
-
-    if (!results) return [];
     let extraHits = [];
     let nbHits = 0;
     if (results.length > 1 && results[results.length -1].params.startsWith('filters=path')) {
