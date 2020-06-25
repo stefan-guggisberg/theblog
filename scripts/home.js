@@ -72,7 +72,7 @@ export function setupHomepage() {
       return item;
     },
     callback: ({ extraHits }) => {
-      // move first card to featured 
+      // move first card to featured
       const $firstCard = document.querySelector('.home-page .articles .card');
       if ($firstCard) {
         $firstCard.classList.add('featured');

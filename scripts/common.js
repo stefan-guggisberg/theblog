@@ -350,6 +350,7 @@ export function helixQuery(appId, key, indexName) {
     const results = [];
     await Promise.all(queries.map(async (query) => {
       const params = [];
+
       params.push('api-version=2019-05-06');
       params.push(`$filter=${encodeURIComponent(query.filters)}`);
       if (query.hitsPerPage) {
@@ -369,6 +370,7 @@ export function helixQuery(appId, key, indexName) {
       results.push({
         hits: json.value,
         nbHits: json['@odata.count'],
+        params: query.filters,
       });
     }));
 
@@ -381,7 +383,7 @@ export function helixQuery(appId, key, indexName) {
 
     let extraHits = [];
     let nbHits = 0;
-    if (results.length > 1 && results[results.length -1].params.startsWith('filters=path')) {
+    if (results.length > 1 && results[results.length -1].params.startsWith('path ')) {
       // collect extra hits from last result separately
       const extraResult = results.pop();
       extraResult.hits.forEach((hit) => extraHits.push(hit));
