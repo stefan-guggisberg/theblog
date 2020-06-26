@@ -342,8 +342,7 @@ export function helixQuery(appId, key, indexName) {
       return { hits: [] };
     }
     // fetch from azure
-    const results = [];
-    await Promise.all(queries.map(async (query) => {
+    const results = await Promise.all(queries.map(async (query) => {
       const url = new URL(`https://${appId}.search.windows.net/indexes/${indexName}/docs`);
       const params = url.searchParams;
 
@@ -368,12 +367,11 @@ export function helixQuery(appId, key, indexName) {
       });
 
       const json = await res.json();
-
-      results.push({
+      return {
         hits: json.value,
         nbHits: json['@odata.count'],
         params: query.filters,
-      });
+      };
     }));
 
     /*
