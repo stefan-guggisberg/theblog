@@ -335,31 +335,33 @@ export function addCard(hit, $container, $template) {
  * @returns {function} The query function
  */
 export function helixQuery(appId, key, indexName) {
-  return async (queries, hitsPerPage) => {
+  return async (queries, hitsTotal) => {
     const page = window.blog.nextPage || 0;
     window.blog.nextPage = page + 1;
     if (!queries || queries.length === 0) {
       return { hits: [] };
     }
-
     // fetch from azure
-    const url = new URL(`https://${appId}.search.windows.net/indexes/${indexName}/docs`);
-    const headers = new Headers();
-    headers.append('api-key', key);
-
     const results = [];
     await Promise.all(queries.map(async (query) => {
-      const params = [];
+      const url = new URL(`https://${appId}.search.windows.net/indexes/${indexName}/docs`);
+      const params = url.searchParams;
 
-      params.push('api-version=2019-05-06');
-      params.push(`$filter=${encodeURIComponent(query.filters)}`);
-      if (query.hitsPerPage) {
-        params.push(`$top=${query.hitsPerPage}`);
+      params.append('api-version', '2019-05-06');
+      params.append('$filter', query.filters);
+
+      const { hitsPerPage } = query;
+      if (hitsPerPage) {
+        params.append('$top', hitsPerPage);
+        params.append('$skip', (page * hitsPerPage));
       }
-      params.push('$orderby=date desc');
-      params.push('$count=true');
 
-      url.search = params.join('&');
+      params.append('$orderby', 'date desc');
+      params.append('$count', 'true');
+
+      const headers = new Headers();
+      headers.append('api-key', key);
+
       const res = await fetch(url, {
         method: 'GET',
         headers,
@@ -405,7 +407,7 @@ export function helixQuery(appId, key, indexName) {
         return unique.find((item) => item.objectID === hit.objectID)
           ? unique : [...unique, hit];
       }, []);
-    return { hits: hits.slice(0, hitsPerPage), nbHits, extraHits };
+    return { hits: hits.slice(0, hitsTotal), nbHits, extraHits };
   }
 }
 
@@ -434,6 +436,7 @@ export function setupSearch({
     queries.push({
       indexName,
       filters: filters.join(' and '),
+      hitsPerPage,
     });
   }
 
