@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Adobe Blog</title>
+  <link href="https://blog.adobe.com/"/>
+  <id>https://blog.adobe.com/</id>
+  <updated>2021-03-22T00:00:00.000Z</updated>
+  <entry>
+    <id>https://theblog--stefan-guggisberg.hlx.page/en/publish/2021/03/22/the-start-of-something-new.html</id>
+    <title>The start of something new</title>
+    <updated>2021-03-22T00:00:00.000Z</updated>
+    <content><![CDATA[
+      <esi:include src="/en/publish/2021/03/22/the-start-of-something-new.embed.html"></esi:include>
+   ]]></content>
+  </entry>
+</feed>

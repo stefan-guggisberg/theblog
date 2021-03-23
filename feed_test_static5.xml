@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Adobe Blog</title>
+  <link href="https://blog.adobe.com/"/>
+  <id>https://blog.adobe.com/</id>
+  <updated>2021-03-22T00:00:00.000Z</updated>
+  <entry>
+    <id>https://theblog--stefan-guggisberg.hlx.page/en/publish/2021/03/22/the-start-of-something-new.html</id>
+    <title>The start of something new</title>
+    <updated>2021-03-22T00:00:00.000Z</updated>
+    <content><![CDATA[
+      <esi:include src="/en/publish/2021/03/22/the-start-of-something-new.embed.html"></esi:include>
+   ]]></content>
+  </entry>
+
+  <entry>
+    <id>https://theblog--stefan-guggisberg.hlx.page/en/publish/2021/03/22/world-class-experience-makers-headline-adobe-summit-keynotes.html</id>
+    <title>World-class experience makers headline Adobe Summit keynotes</title>
+    <updated>2021-03-22T00:00:00.000Z</updated>
+    <content><![CDATA[
+      <esi:include src="/en/publish/2021/03/22/world-class-experience-makers-headline-adobe-summit-keynotes.embed.html"></esi:include>
+   ]]></content>
+  </entry>
+
+  <entry>
+    <id>https://theblog--stefan-guggisberg.hlx.page/en/publish/2021/03/19/adobes-pdf-apis-expand-functionality-and-flexibility-for-developers.html</id>
+    <title>Adobe PDF APIs expand functionality and flexibility for developers</title>
+    <updated>2021-03-19T00:00:00.000Z</updated>
+    <content><![CDATA[
+      <esi:include src="/en/publish/2021/03/19/adobes-pdf-apis-expand-functionality-and-flexibility-for-developers.embed.html"></esi:include>
+   ]]></content>
+  </entry>
+
+  <entry>
+    <id>https://theblog--stefan-guggisberg.hlx.page/en/publish/2021/03/19/kernel-localized-video-campaigns-at-scale.html</id>
+    <title>In-house agency Kernel reimagines brand messaging with video at scale</title>
+    <updated>2021-03-19T00:00:00.000Z</updated>
+    <content><![CDATA[
+      <esi:include src="/en/publish/2021/03/19/kernel-localized-video-campaigns-at-scale.embed.html"></esi:include>
+   ]]></content>
+  </entry>
+
+  <entry>
+    <id>https://theblog--stefan-guggisberg.hlx.page/en/publish/2021/03/18/adobe-helps-small-businesses-digitize-with-new-advanced-e-sign-features-in-acrobat.html</id>
+    <title>Adobe helps small businesses digitize with new advanced e-sign features in Acrobat</title>
+    <updated>2021-03-18T00:00:00.000Z</updated>
+    <content><![CDATA[
+      <esi:include src="/en/publish/2021/03/18/adobe-helps-small-businesses-digitize-with-new-advanced-e-sign-features-in-acrobat.embed.html"></esi:include>
+   ]]></content>
+  </entry>
+</feed>
